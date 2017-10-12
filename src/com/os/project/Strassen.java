@@ -1,10 +1,35 @@
 package com.os.project;
 
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 
-public class Strassen extends Thread{
+public class Strassen implements Callable<int[][]>{
 
-    public int[][] multiply(int[][] A, int[][] B) {
+    private int[][] A;
+    private int[][] B;
+    private int[][] M;
+    private int n;
+    public int[][] C;
+
+
+    public Strassen (int[][] A) {
+        this.M = A;
+    }
+
+    public Strassen (int[][] A,int[][] B){
+        this.A = A;
+        this.B = B;
+        this.n = A.length;
+    }
+
+    @Override
+    public int[][] call() throws Exception {
+            C = multiply(A,B);
+        return C;
+    }
+
+    ExecutorService executor = Executors.newFixedThreadPool (4);
+
+    public int[][] multiply(int[][] A, int[][] B) throws ExecutionException, InterruptedException {
         int n = A.length;
         int R[][] = new int [n][n];
 
@@ -35,6 +60,29 @@ public class Strassen extends Thread{
             split(B, B21, n/2, 0);
             split(B, B22, n/2, n/2);
 
+            Future<int[][]> future1;
+            Future<int[][]> future2;
+            Future<int[][]> future3;
+            Future<int[][]> future4;
+            Future<int[][]> future5;
+            Future<int[][]> future6;
+            Future<int[][]> future7;
+
+//            future1 = executor.submit(new Strassen(multiply(add(A11,A22), add(B11,B22))));
+//            future2 = executor.submit(new Strassen(multiply(add(A21,A22), B11)));
+//            future3 = executor.submit(new Strassen(multiply(A11, sub(B12, B22))));
+//            future4 = executor.submit(new Strassen(multiply(A22, sub(B21, B11))));
+//            future5 = executor.submit(new Strassen(multiply(add(A11, A12), B22)));
+//            future6 = executor.submit(new Strassen(multiply(sub(A21, A11), add(B11, B12))));
+//            future7 = executor.submit(new Strassen(multiply(sub(A12, A22), add(B21, B22))));
+
+            future1 = executor.submit(new Strassen(add(A11,A22), add(B11,B22)));
+            future2 = executor.submit(new Strassen(add(A21,A22), B11));
+            future3 = executor.submit(new Strassen(A11, sub(B12, B22)));
+            future4 = executor.submit(new Strassen(A22, sub(B21, B11)));
+            future5 = executor.submit(new Strassen(add(A11, A12), B22));
+            future6 = executor.submit(new Strassen(sub(A21, A11), add(B11, B12)));
+            future7 = executor.submit(new Strassen(sub(A12, A22), add(B21, B22)));
 
             /**
              M1 = (A11 + A22)(B11 + B22)
@@ -45,7 +93,7 @@ public class Strassen extends Thread{
              M6 = (A21 - A11) (B11 + B12)
              M7 = (A12 - A22) (B21 + B22)
              **/
-
+            /**
             int[][] M1 = multiply(add(A11,A22), add(B11,B22));
             int[][] M2 = multiply(add(A21,A22), B11);
             int [][] M3 = multiply(A11, sub(B12, B22));
@@ -53,6 +101,14 @@ public class Strassen extends Thread{
             int [][] M5 = multiply(add(A11, A12), B22);
             int [][] M6 = multiply(sub(A21, A11), add(B11, B12));
             int [][] M7 = multiply(sub(A12, A22), add(B21, B22));
+             **/
+            int[][] M1 = future1.get();
+            int[][] M2 = future2.get();
+            int [][] M3 = future3.get();
+            int [][] M4 = future4.get();
+            int [][] M5 = future5.get();
+            int [][] M6 = future6.get();
+            int [][] M7 = future7.get();
 
             /**
              C11 = M1 + M4 - M5 + M7

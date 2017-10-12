@@ -1,9 +1,16 @@
 package com.os.project;
+/**
+ *
+ *
+ * @author Arvind
+ *
+ *
+ * */
 
 import java.util.Scanner;
 
 public class Main {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         Scanner sc = new Scanner(System.in);
 //        System.out.println("The matrix will use A{MxP} and B{PxN}");
 //        System.out.println("Enter the size of Matrix:");
@@ -36,8 +43,9 @@ public class Main {
 
 
         //strassen test for n
-        Strassen s = new Strassen();
-        int R[][] = s.multiply(matrix_1,matrix_2);
+
+        Strassen s = new Strassen(matrix_1,matrix_2);
+        int R[][] = s.call();
         display_matrix(R);
 
 
